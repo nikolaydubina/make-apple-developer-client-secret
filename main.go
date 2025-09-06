@@ -19,15 +19,15 @@ https://developer.apple.com/documentation/accountorganizationaldatasharing/creat
 
 func main() {
 	var (
-		outFileName        string
-		devCertificateName string
-		kid                string
-		teamID             string
-		clientID           string
-		expiration         time.Duration
+		outFilePath            string
+		devCertificateFilePath string
+		kid                    string
+		teamID                 string
+		clientID               string
+		expiration             time.Duration
 	)
-	flag.StringVar(&outFileName, "o", "", "output filename, if not provided then STDOUT")
-	flag.StringVar(&devCertificateName, "dev-certificate", "", "filepath to .p8 file (create Key/certificate: https://developer.apple.com/account/resources/authkeys/list)")
+	flag.StringVar(&outFilePath, "o", "", "output filename, if not provided then STDOUT")
+	flag.StringVar(&devCertificateFilePath, "dev-certificate", "", "filepath to .p8 file (create Key/certificate: https://developer.apple.com/account/resources/authkeys/list)")
 	flag.StringVar(&kid, "kid", "", "10 char kid for certificate (can be found in the https://developer.apple.com/account/resources/authkeys/list -> Key Details")
 	flag.StringVar(&teamID, "team-id", "", "10 char team id (can be found next to dev account name)")
 	flag.StringVar(&clientID, "client-id", "", "use same App ID or Services ID that use as client_id used to generate refresh tokens")
@@ -45,7 +45,7 @@ func main() {
 		log.Fatalln("expiration time should be less than 6 months")
 	}
 
-	cerFileBytes, err := os.ReadFile(devCertificateName)
+	cerFileBytes, err := os.ReadFile(devCertificateFilePath)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -56,9 +56,9 @@ func main() {
 	}
 
 	method := jwt.SigningMethodES256
-	token := &jwt.Token{
+	token := jwt.Token{
 		Method: method,
-		Header: map[string]interface{}{
+		Header: map[string]any{
 			"typ": "JWT",
 			"alg": method.Alg(),
 			"kid": kid,
@@ -78,8 +78,8 @@ func main() {
 	}
 
 	var out io.Writer = os.Stdout
-	if outFileName != "" {
-		outf, err := os.OpenFile(outFileName, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+	if outFilePath != "" {
+		outf, err := os.OpenFile(outFilePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
 		if err != nil {
 			log.Fatalln(err)
 		}
